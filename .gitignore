@@ -1,0 +1,21 @@
+# Backend
+backend-rodo/target/
+*.class
+*.log
+*.jar
+*.war
+targer/
+node_modules/
+.env
+
+# Frontend
+front-rodo/node_modules/
+front-rodo/dist/
+front-rodo/.env.local
+
+# IDEs & OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db

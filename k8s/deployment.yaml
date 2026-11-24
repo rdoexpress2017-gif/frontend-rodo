@@ -1,0 +1,82 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: rodo-express
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: front-rodo
+  namespace: rodo-express
+  labels:
+    app: front-rodo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: front-rodo
+  template:
+    metadata:
+      labels:
+        app: front-rodo
+    spec:
+      containers:
+        - name: front-rodo
+          image: ${FRONTEND_IMAGE}
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+              name: http
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: front-rodo-service
+  namespace: rodo-express
+  labels:
+    app: front-rodo
+spec:
+  type: ClusterIP
+  selector:
+    app: front-rodo
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80
+---
+# Ingress Traefik nativo do K3s na mesma VPS:
+# - Roteia "/" para o Frontend React (front-rodo-service:80)
+# - Roteia "/api" diretamente para o Backend Spring Boot WebFlux (backend-rodo-service:8080) exposto para a internet
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: front-rodo-ingress
+  namespace: rodo-express
+  annotations:
+    kubernetes.io/ingress.class: traefik
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: backend-rodo-service
+                port:
+                  number: 8080
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: front-rodo-service
+                port:
+                  number: 80
