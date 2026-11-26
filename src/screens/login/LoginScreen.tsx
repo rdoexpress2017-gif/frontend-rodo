@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Zap, Eye, EyeOff } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Zap, Eye, EyeOff, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../../shared/hooks/useAuth';
 
 export const LoginScreen: React.FC = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -13,13 +14,25 @@ export const LoginScreen: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const { sessionExpired, redirectTo } = useMemo(() => {
+    const searchStr = location.search || window.location.search;
+    const params = new URLSearchParams(searchStr);
+    const expired = params.get('expired') === 'true';
+    const rawRedirect = params.get('redirect');
+    const safeRedirect =
+      rawRedirect && rawRedirect.startsWith('/') && !rawRedirect.startsWith('/login')
+        ? rawRedirect
+        : '/pedidos';
+    return { sessionExpired: expired, redirectTo: safeRedirect };
+  }, [location.search]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
     try {
       await login(email, password);
-      navigate('/pedidos', { replace: true });
+      navigate(redirectTo, { replace: true });
     } catch {
       setError('Usuario ou senha incorretos');
     } finally {
@@ -51,10 +64,20 @@ export const LoginScreen: React.FC = () => {
         </div>
 
         {/* RDO EXPRESS Title */}
-        <h1 className="text-3xl font-bold tracking-wide mb-8">
+        <h1 className="text-3xl font-bold tracking-wide mb-6">
           <span className="text-[#D92D3A]">RDO</span>{' '}
           <span className="text-slate-800 font-semibold">EXPRESS</span>
         </h1>
+
+        {sessionExpired && (
+          <div
+            role="alert"
+            className="mb-5 px-4 py-3 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 text-xs font-bold flex items-center gap-2.5 text-left"
+          >
+            <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+            <span>Sua sessão expirou. Faça login novamente para continuar.</span>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4 text-left">
           <div>

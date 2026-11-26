@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { AuthUser } from '../types/domain.types';
-import { api } from '../services/api';
+import { api, resetUnauthorizedLock } from '../services/api';
 
 interface AuthContextValue {
   user: AuthUser | null;
@@ -22,14 +22,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   });
 
+  useEffect(() => {
+    const handleSessionExpired = () => {
+      localStorage.removeItem('rodo_auth');
+      setUser(null);
+    };
+    window.addEventListener('auth:session-expired', handleSessionExpired);
+    return () => window.removeEventListener('auth:session-expired', handleSessionExpired);
+  }, []);
+
   const login = async (email: string, password: string) => {
     const response = await api.post<AuthUser>('/auth/login', { email, password });
     localStorage.setItem('rodo_auth', JSON.stringify(response.data));
+    resetUnauthorizedLock();
     setUser(response.data);
   };
 
   const logout = () => {
     localStorage.removeItem('rodo_auth');
+    resetUnauthorizedLock();
     setUser(null);
   };
 
