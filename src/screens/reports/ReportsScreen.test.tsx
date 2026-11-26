@@ -335,6 +335,7 @@ describe('ReportsScreen', () => {
           paidRevenue: 4035.0,
           pendingRevenue: 400.0,
           netProfit: 477.0,
+          estimatedProfit: 557.0,
           totalCommissions: 3548.0,
           paidCommissions: 3228.0,
           totalExpenses: 330.0,
@@ -396,12 +397,14 @@ describe('ReportsScreen', () => {
     const viewBtn = screen.getByRole('button', { name: /Ver Relatório/i });
     await userEvent.click(viewBtn);
 
-    // Verify all 8 RESUMO GERAL metrics
+    // Verify all RESUMO GERAL metrics including Lucro Estimado
     expect(await screen.findByText(/Valor total de pedidos \(136\)/i)).toBeInTheDocument();
     expect(screen.getByText(/125 pagos em caixa/i)).toBeInTheDocument();
     expect(screen.getByText(/11 a receber \(não pagos\)/i)).toBeInTheDocument();
     expect(screen.getByText(/Somente sobre pedidos pagos/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Lucro Estimado/i).length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText(/477,00/).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText(/557,00/).length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText(/330,00/)).toBeInTheDocument();
     expect(screen.getByText(/125 pagos • 11 pendentes/i)).toBeInTheDocument();
 

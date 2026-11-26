@@ -48,6 +48,34 @@ const formatFullDate = (iso?: string | null): string => {
   });
 };
 
+const isOrderCollectedOrForward = (status?: string | null): boolean =>
+  status === 'COLETADO' ||
+  status === 'ENTREGUE' ||
+  status === 'AGUARDANDO_PAGAMENTO' ||
+  status === 'PAGO';
+
+const resolveCompanyEstimatedProfit = (
+  report?: ReportDTO | null,
+  orders?: OrderDTO[]
+): number => {
+  const s = report?.companySummary;
+  if (!s) return 0;
+  if (typeof s.estimatedProfit === 'number' && !Number.isNaN(s.estimatedProfit)) {
+    return s.estimatedProfit;
+  }
+  const expenses = s.totalExpenses ?? 0;
+  if (orders && orders.length > 0) {
+    const eligible = orders.filter((o) => isOrderCollectedOrForward(o.status));
+    const eligibleRevenue = eligible.reduce((acc, o) => acc + (o.amount || 0), 0);
+    const eligibleCommissions = eligible.reduce(
+      (acc, o) => acc + (o.motoboyCommissionAmount || 0),
+      0
+    );
+    return eligibleRevenue - eligibleCommissions - expenses;
+  }
+  return (s.totalRevenue ?? 0) - (s.totalCommissions ?? 0) - expenses;
+};
+
 export const ReportsScreen: React.FC = () => {
   const [subTab, setSubTab] = useState<'MASTER' | 'CLIENTE' | 'MOTOBOY' | 'EMPRESA'>('MASTER');
 
@@ -790,6 +818,7 @@ export const ReportsScreen: React.FC = () => {
                   </th>
                   {subTab === 'CLIENTE' && <th className="py-2.5 px-2.5">Status da OP</th>}
                   {subTab === 'EMPRESA' && <th className="py-2.5 px-2.5">Lucro (Pagos)</th>}
+                  {subTab === 'EMPRESA' && <th className="py-2.5 px-2.5">Lucro Estimado</th>}
                   {subTab === 'EMPRESA' && <th className="py-2.5 px-2.5">E-mail Master</th>}
                   <th className="py-2.5 px-2.5 text-center w-14">Ações</th>
                 </tr>
@@ -797,7 +826,7 @@ export const ReportsScreen: React.FC = () => {
               <tbody className="text-[11px] text-slate-700">
                 {sortedAndFilteredReports.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="py-12 text-center text-slate-400">
+                    <td colSpan={10} className="py-12 text-center text-slate-400">
                       Nenhum relatório gerado nesta categoria. Clique em &quot;Emitir Relatório
                       Avulso&quot; para consolidar um período.
                     </td>
@@ -846,6 +875,11 @@ export const ReportsScreen: React.FC = () => {
                         {subTab === 'EMPRESA' && (
                           <td className="py-2.5 px-2.5 font-extrabold text-emerald-700 whitespace-nowrap">
                             {formatCurrency(rep.companySummary?.netProfit ?? 0)}
+                          </td>
+                        )}
+                        {subTab === 'EMPRESA' && (
+                          <td className="py-2.5 px-2.5 font-extrabold text-blue-700 whitespace-nowrap">
+                            {formatCurrency(resolveCompanyEstimatedProfit(rep))}
                           </td>
                         )}
                         {subTab === 'EMPRESA' && (
@@ -1091,6 +1125,20 @@ export const ReportsScreen: React.FC = () => {
                       </p>
                       <p className="text-[11px] font-semibold text-slate-500">
                         Somente sobre pedidos pagos
+                      </p>
+                    </div>
+
+                    <div className="p-3.5 rounded-xl bg-blue-50/70 border border-blue-200 space-y-1">
+                      <p className="text-xs font-extrabold text-blue-900 uppercase">
+                        Lucro Estimado
+                      </p>
+                      <p className="text-base font-extrabold text-blue-800">
+                        {formatCurrency(
+                          resolveCompanyEstimatedProfit(selectedReport, selectedOrders)
+                        )}
+                      </p>
+                      <p className="text-[11px] font-bold text-blue-700">
+                        Status Coletado para frente
                       </p>
                     </div>
 

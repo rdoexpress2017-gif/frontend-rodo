@@ -491,6 +491,28 @@ export const FinancialScreen: React.FC = () => {
           </div>
         </div>
 
+        <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-blue-50/70 border border-blue-200">
+          <div className="w-11 h-11 rounded-2xl bg-blue-200/80 text-blue-800 flex items-center justify-center shrink-0">
+            <PiggyBank className="w-6 h-6" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-xs font-extrabold text-blue-900 uppercase tracking-wide">
+              Lucro Estimado
+            </p>
+            <p className="text-base font-extrabold text-blue-800">
+              {maskValue(
+                formatCurrency(
+                  summary.estimatedProfit ??
+                    summary.totalRevenue - summary.totalCommissions - totalDespesasLancamentos
+                )
+              )}
+            </p>
+            <p className="text-[11px] font-bold text-blue-700">
+              Status Coletado para frente
+            </p>
+          </div>
+        </div>
+
         <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-slate-50 border border-slate-200">
           <div className="w-11 h-11 rounded-2xl bg-rose-100 text-[#D92D3A] flex items-center justify-center shrink-0">
             <ArrowUpCircle className="w-6 h-6" />

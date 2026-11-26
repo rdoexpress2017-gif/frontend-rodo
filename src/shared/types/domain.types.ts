@@ -133,6 +133,7 @@ export interface FinancialSummaryDTO {
   paidCommissions?: number;
   paidOrdersCount?: number;
   pendingOrdersCount?: number;
+  estimatedProfit?: number;
 }
 
 export interface ExpenseDTO {
@@ -165,6 +166,7 @@ export interface CompanyReportSummaryDTO {
   paidRevenue: number;
   pendingRevenue: number;
   netProfit: number;
+  estimatedProfit?: number;
   totalCommissions: number;
   paidCommissions: number;
   totalExpenses: number;

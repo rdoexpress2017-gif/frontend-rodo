@@ -43,6 +43,7 @@ describe('FinancialScreen', () => {
             paidOrdersCount: 20,
             pendingOrdersCount: 6,
             netBalance: 60.0,
+            estimatedProfit: 100.0,
           },
         });
       }
@@ -102,20 +103,22 @@ describe('FinancialScreen', () => {
 
     render(<FinancialScreen />);
 
-    // Verify card labels: "Despesas" (replaced "Empresa"), "Lucro" (replaced "Saldo Total"), "Já Recebido", and "A Receber"
+    // Verify card labels: "Despesas" (replaced "Empresa"), "Lucro" (replaced "Saldo Total"), "Lucro Estimado", "Já Recebido", and "A Receber"
     expect(await screen.findByText('Despesas')).toBeInTheDocument();
     expect(screen.queryByText('Empresa')).not.toBeInTheDocument();
     expect(screen.getByText('Lucro')).toBeInTheDocument();
+    expect(screen.getByText('Lucro Estimado')).toBeInTheDocument();
     expect(screen.queryByText('Saldo Total')).not.toBeInTheDocument();
     expect(screen.getByText('Já Recebido')).toBeInTheDocument();
     expect(screen.getByText('A Receber')).toBeInTheDocument();
 
-    // Verify values rendered for Total Pedidos (R$ 777,00), Já Recebido (R$ 577,00), A Receber (R$ 200,00 / 6 a receber), Despesas (R$ 55,40) and Lucro (R$ 60,00)
+    // Verify values rendered for Total Pedidos (R$ 777,00), Já Recebido (R$ 577,00), A Receber (R$ 200,00 / 6 a receber), Despesas (R$ 55,40), Lucro (R$ 60,00) and Lucro Estimado (R$ 100,00)
     expect(await screen.findByText(/55,40/)).toBeInTheDocument();
     expect(screen.getByText(/577,00/)).toBeInTheDocument();
     expect(screen.getByText(/200,00/)).toBeInTheDocument();
     expect(screen.getByText(/6 a receber/i)).toBeInTheDocument();
     expect(screen.getByText(/60,00/)).toBeInTheDocument();
+    expect(screen.getByText(/100,00/)).toBeInTheDocument();
 
     // Verify date filters in RDO tab and the red "Calcular" button next to the filters trigger summary recalculation
     const startInput = screen.getByLabelText(/Data Inicial/i);
