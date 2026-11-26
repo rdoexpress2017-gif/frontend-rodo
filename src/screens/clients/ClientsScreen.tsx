@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Plus, Edit2, X } from 'lucide-react';
+import { Plus, Edit2, Trash2, X } from 'lucide-react';
 import {
   BillingCycleType,
   ClientDTO,
@@ -94,6 +94,14 @@ export const ClientsScreen: React.FC = () => {
     loadClients();
   };
 
+  const handleDelete = async (id: string) => {
+    if (typeof window.confirm === 'function' && !window.confirm('Deseja realmente remover este cliente?')) {
+      return;
+    }
+    await api.delete(`/clients/${id}`);
+    loadClients();
+  };
+
   return (
     <div className="space-y-5">
       <div className="flex justify-end">
@@ -143,13 +151,24 @@ export const ClientsScreen: React.FC = () => {
                   </span>
                 </td>
                 <td className="py-3.5 px-4 text-right">
-                  <button
-                    type="button"
-                    onClick={() => openModal(c)}
-                    className="p-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 cursor-pointer"
-                  >
-                    <Edit2 className="w-3.5 h-3.5" />
-                  </button>
+                  <div className="inline-flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      aria-label="Editar cliente"
+                      onClick={() => openModal(c)}
+                      className="p-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 cursor-pointer"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Excluir cliente"
+                      onClick={() => handleDelete(c.id)}
+                      className="p-1.5 rounded-lg border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 cursor-pointer"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}

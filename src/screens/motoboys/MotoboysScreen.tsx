@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Plus, Edit2, X } from 'lucide-react';
+import { Plus, Edit2, Trash2, X } from 'lucide-react';
 import { MotoboyDTO, MotoboyType } from '../../shared/types/domain.types';
 import { api } from '../../shared/services/api';
 
@@ -51,6 +51,14 @@ export const MotoboysScreen: React.FC = () => {
     loadMotoboys();
   };
 
+  const handleDelete = async (id: string) => {
+    if (typeof window.confirm === 'function' && !window.confirm('Deseja realmente remover este motoboy?')) {
+      return;
+    }
+    await api.delete(`/motoboys/${id}`);
+    loadMotoboys();
+  };
+
   return (
     <div className="space-y-5">
       <div className="flex justify-end">
@@ -99,13 +107,24 @@ export const MotoboysScreen: React.FC = () => {
                   </span>
                 </td>
                 <td className="py-3.5 px-4 text-right">
-                  <button
-                    type="button"
-                    onClick={() => openModal(m)}
-                    className="p-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 cursor-pointer"
-                  >
-                    <Edit2 className="w-3.5 h-3.5" />
-                  </button>
+                  <div className="inline-flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      aria-label="Editar motoboy"
+                      onClick={() => openModal(m)}
+                      className="p-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 cursor-pointer"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Excluir motoboy"
+                      onClick={() => handleDelete(m.id)}
+                      className="p-1.5 rounded-lg border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 cursor-pointer"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
